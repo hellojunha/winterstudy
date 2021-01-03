@@ -60,9 +60,10 @@ func _getCode(w http.ResponseWriter, r *http.Request) {
 
 func _registerComment(w http.ResponseWriter, r *http.Request) {
 	postId, err := strconv.Atoi(r.PostFormValue("post_id"))
-	if err != nil {
+	if err == nil {
+		registerComment(r.PostFormValue("captcha"), postId, r.PostFormValue("text"))
+	} else {
 		die(w)
-		return
 	}
-	registerComment(r.PostFormValue("captcha"), postId, r.PostFormValue("text"))
+
 }
