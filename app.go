@@ -3,11 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 )
+
+var wd string
 
 func init() {
 	f, err := os.OpenFile("/home/joona0825/winterstudy.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -18,6 +21,9 @@ func init() {
 	}
 
 	log.Println("instance is now running!")
+
+	_wd, _ := os.Getwd()
+	wd = _wd
 }
 
 func main() {
@@ -27,7 +33,10 @@ func main() {
 	r.HandleFunc("/code", _registerCode).Methods(http.MethodPost)
 	r.HandleFunc("/code/{id:[0-9]+}", _getCode).Methods(http.MethodGet)
 	r.HandleFunc("/comment", _registerComment).Methods(http.MethodPost)
-	http.ListenAndServe(":9927", r)
+	err := http.ListenAndServe(":9927", r)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 func die(w http.ResponseWriter) {
@@ -37,10 +46,27 @@ func die(w http.ResponseWriter) {
 func home(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, err := strconv.Atoi(vars["page"])
+
+	var list []Post
 	if err == nil {
-		getPostList(page)
+		list = getPostList(page)
 	} else {
-		getPostList(0)
+		list = getPostList(0)
+	}
+
+	t, err := template.ParseFiles(wd + "/html/index.html")
+	if err == nil {
+		data := struct {
+			Posts []Post
+		} {
+			Posts: list,
+		}
+		err := t.Execute(w, data)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	} else {
+		log.Println(err.Error())
 	}
 }
 
@@ -51,11 +77,23 @@ func _registerCode(w http.ResponseWriter, r *http.Request) {
 func _getCode(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
+
 	if err == nil {
-		getPost(id)
+		post := getPost(id)
+		t, err := template.ParseFiles(wd + "/html/post.html")
+		if err == nil {
+			err := t.Execute(w, post)
+			if err != nil {
+				log.Println(err.Error())
+			}
+		} else {
+			log.Println(err.Error())
+		}
 	} else {
 		die(w)
+		return
 	}
+
 }
 
 func _registerComment(w http.ResponseWriter, r *http.Request) {
