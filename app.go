@@ -112,7 +112,14 @@ func _getCode(w http.ResponseWriter, r *http.Request) {
 		post := getPost(id)
 		t, err := template.ParseFiles(wd + "/html/code.html")
 		if err == nil {
-			err := t.Execute(w, post)
+			data := struct {
+				Post Post
+				CaptchaKey string
+			} {
+				Post: *post,
+				CaptchaKey: CAPTCHA_KEY,
+			}
+			err := t.Execute(w, data)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -128,8 +135,14 @@ func _getCode(w http.ResponseWriter, r *http.Request) {
 
 func _registerComment(w http.ResponseWriter, r *http.Request) {
 	postId, err := strconv.Atoi(r.PostFormValue("post_id"))
+	comment := r.PostFormValue("comment")
 	if err == nil {
-		registerComment(r.PostFormValue("captcha"), postId, r.PostFormValue("text"))
+		result := registerComment(r.PostFormValue("captcha"), postId, comment)
+		if result {
+			http.Redirect(w, r, "https://study.alfr.kr/code/" + r.PostFormValue("post_id"), http.StatusSeeOther)
+		} else {
+			fmt.Fprintf(w, "Failed to register comment.\nThis was your comment:\n\n%s", comment)
+		}
 	} else {
 		die(w)
 	}
