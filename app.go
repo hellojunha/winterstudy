@@ -30,7 +30,8 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", home)
 	r.HandleFunc("/{page:[0-9]+}", home)
-	r.HandleFunc("/code", _registerCode).Methods(http.MethodPost)
+	r.HandleFunc("/post", _registerCodeForm).Methods(http.MethodGet)
+	r.HandleFunc("/post/register", _registerCode).Methods(http.MethodPost)
 	r.HandleFunc("/code/{id:[0-9]+}", _getCode).Methods(http.MethodGet)
 	r.HandleFunc("/comment", _registerComment).Methods(http.MethodPost)
 	err := http.ListenAndServe(":9927", r)
@@ -48,18 +49,39 @@ func home(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.Atoi(vars["page"])
 
 	var list []Post
+	var pages int
+
 	if err == nil {
-		list = getPostList(page)
+		list, pages = getPostList(page)
 	} else {
-		list = getPostList(0)
+		list, pages = getPostList(0)
 	}
 
 	t, err := template.ParseFiles(wd + "/html/index.html")
 	if err == nil {
 		data := struct {
 			Posts []Post
+			Pages []int
 		} {
 			Posts: list,
+			Pages: make([]int, pages),
+		}
+		err := t.Execute(w, data)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	} else {
+		log.Println(err.Error())
+	}
+}
+
+func _registerCodeForm(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles(wd + "/html/post.html")
+	if err == nil {
+		data := struct {
+			CaptchaKey string
+		} {
+			CaptchaKey: CAPTCHA_KEY,
 		}
 		err := t.Execute(w, data)
 		if err != nil {
@@ -71,7 +93,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func _registerCode(w http.ResponseWriter, r *http.Request) {
-	registerPost(r.PostFormValue("captcha"), r.PostFormValue("code"))
+	result := registerPost(r.PostFormValue("captcha"), r.PostFormValue("code"))
+	if result == -1 {
+		t, _ := template.ParseFiles(wd + "/html/post_fail.html")
+		t.Execute(w, r.PostFormValue("code"))
+		return
+	}
+
+	t, _ := template.ParseFiles(wd + "/html/post_success.html")
+	t.Execute(w, result)
 }
 
 func _getCode(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +110,7 @@ func _getCode(w http.ResponseWriter, r *http.Request) {
 
 	if err == nil {
 		post := getPost(id)
-		t, err := template.ParseFiles(wd + "/html/post.html")
+		t, err := template.ParseFiles(wd + "/html/code.html")
 		if err == nil {
 			err := t.Execute(w, post)
 			if err != nil {

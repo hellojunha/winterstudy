@@ -50,14 +50,22 @@
 	</script>
 </head>
 <body>
-	{{ range .Posts }}
-		<div class="post">
-			<pre><code>{{ .Code }}</code></pre>
-			<p>
-				{{ len .Comments }} comments for this code<br>
-				<a href="/code/{{ .Id }}">View or register comment</a>
-			</p>
-		</div>
-	{{ end }}
+<p style="font-size: 24px; text-align: right"><a href="/post">SUBMIT YOUR CODE HERE</a></p>
+<div style="height: 20px"></div>
+{{ range .Posts }}
+	<div class="post">
+		<p>#{{ .Id }}</p>
+		<pre><code>{{ .Code }}</code></pre>
+		<p>
+			{{ len .Comments }} comments for this code<br>
+			<a href="/code/{{ .Id }}">View or register comment</a>
+		</p>
+	</div>
+{{ end }}
+<p style="text-align: center">
+{{ range $i, $e := .Pages }}
+	&nbsp;<a href="/{{ $i }}">{{ $i }}</a>&nbsp;
+{{ end }}
+</p>
 </body>
 </html>

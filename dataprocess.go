@@ -34,7 +34,8 @@ func getDatabase() *sql.DB {
 }
 
 func verifyCaptcha(response string) bool {
-	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", url.Values{"secret": {""}, "response": {response}})
+	log.Println("response: " + response)
+	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", url.Values{"secret": {CAPTCHA_SECRET}, "response": {response}})
 	if err != nil {
 		log.Println(err.Error())
 		return false
@@ -50,13 +51,13 @@ func verifyCaptcha(response string) bool {
 	return result["success"].(bool)
 }
 
-func getPostList(page int) []Post {
+func getPostList(page int) ([]Post, int) {
 	db := getDatabase()
 	defer db.Close()
 
 	posts := make([]Post, 0)
 
-	rows, err := db.Query("select id from study_post order by id desc limit ?, 10", page * 10)
+	rows, err := db.Query("select id from study_post order by id desc limit ?, ?", page * INDEX_PAGING_NUMBER, INDEX_PAGING_NUMBER)
 	if err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -79,7 +80,14 @@ func getPostList(page int) []Post {
 
 	log.Printf("returning %d posts", len(posts))
 
-	return posts
+	var count int
+	db.QueryRow("select count(*) from study_post").Scan(&count)
+	pages := count / INDEX_PAGING_NUMBER
+	if count % INDEX_PAGING_NUMBER != 0 {
+		pages += 1
+	}
+
+	return posts, pages
 }
 
 func getPost(id int) *Post {
@@ -115,9 +123,9 @@ func getPost(id int) *Post {
 	return &post
 }
 
-func registerPost(captchaResp string, code string) bool {
+func registerPost(captchaResp string, code string) int {
 	if !verifyCaptcha(captchaResp) {
-		return false
+		return -1
 	}
 
 	db := getDatabase()
@@ -126,8 +134,16 @@ func registerPost(captchaResp string, code string) bool {
 	_, err := db.Exec("insert into study_post (code) values (?)", code)
 	if err != nil {
 		log.Println(err.Error())
+		return -1
 	}
-	return err == nil
+
+	var index int
+	err = db.QueryRow("select last_insert_id()").Scan(&index)
+	if err == nil {
+		return index
+	}
+
+	return -1
 }
 
 func registerComment(captchaResp string, postId int, text string) bool {
