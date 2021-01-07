@@ -1,70 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Winter Study</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/default.min.css" />
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" />
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-    <script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
-    <style>
-        body {
-            padding: 20px;
-        }
-
-        p {
-            font-family: sans-serif;
-        }
-
-        .hljs-ln-numbers {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-
-            text-align: center;
-            color: #ccc;
-            border-right: 1px solid #ccc;
-            vertical-align: top;
-            padding-right: 10px !important;
-        }
-
-        .hljs-ln-code {
-            padding-left: 10px !important;
-        }
-        .hljs {
-            white-space: pre;
-            overflow-x: auto;
-        }
-
-        #input {
-            width: 100%;
-            height: 300px;
-            margin-bottom: 20px;
-            resize: none;
-        }
-    </style>
-    <script>
-        hljs.initHighlightingOnLoad();
-
-        var onloadCallback = function() {
-            grecaptcha.render("captcha_area", {
-                "sitekey" : "{{ .CaptchaKey }}",
-                "callback" : function(response) {
-                    document.getElementById("captcha_response").value = response
-                    document.getElementById("code_form").submit();
-                }
-            });
-        };
-    </script>
-</head>
-<body>
+{{ template "header.html" }}
+<script>
+    var onloadCallback = function() {
+        grecaptcha.render("captcha_area", {
+            "sitekey" : "{{ .CaptchaKey }}",
+            "callback" : function(response) {
+                document.getElementById("captcha_response").value = response
+                document.getElementById("code_form").submit();
+            }
+        });
+    };
+</script>
 
 <form id="code_form" action="/post/register" method="post">
     <input type="hidden" name="captcha" id="captcha_response">
-    <textarea name="code" id="input"></textarea>
+    <textarea name="code" class="post" id="input"></textarea>
     <p>Preview</p>
     <pre><code id="output"></code></pre>
     <div id="captcha_area"></div>
@@ -93,6 +42,4 @@
             .replace(/'/g, "&#039;");
     }
 </script>
-
-</body>
-</html>
+{{ template "footer.html" }}

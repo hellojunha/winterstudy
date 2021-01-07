@@ -1,54 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Winter Study</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/default.min.css" />
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" />
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
-    <style>
-        body {
-            padding: 20px;
-        }
-
-        p {
-            font-family: sans-serif;
-        }
-
-        .hljs-ln-numbers {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-
-            text-align: center;
-            color: #ccc;
-            border-right: 1px solid #ccc;
-            vertical-align: top;
-            padding-right: 10px !important;
-        }
-
-        .hljs-ln-code {
-            padding-left: 10px !important;
-        }
-        .hljs {
-            white-space: pre;
-            overflow-x: auto;
-        }
-    </style>
-    <script>
-        hljs.initHighlightingOnLoad();
-        hljs.initLineNumbersOnLoad();
-    </script>
-</head>
-<body>
+{{ template "header.html" }}
 <p style="font-size: 48px">Failed to register your code for some reason.</p>
 <p>This was your code. Copy for try again.</p>
 <p></p>
 <p></p>
 <pre><code>{{ . }}</code></pre>
-</body>
-</html>
+{{ template "footer.html" }}

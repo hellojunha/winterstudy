@@ -20,10 +20,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="151007b0-81f9-46b8-bac5-91ea4f23e221" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/html/footer.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/html/header.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.go" beforeDir="false" afterPath="$PROJECT_DIR$/app.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/const.go" beforeDir="false" afterPath="$PROJECT_DIR$/const.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataprocess.go" beforeDir="false" afterPath="$PROJECT_DIR$/dataprocess.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/html/code.html" beforeDir="false" afterPath="$PROJECT_DIR$/html/code.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/html/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/html/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/html/post.html" beforeDir="false" afterPath="$PROJECT_DIR$/html/post.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/html/post_fail.html" beforeDir="false" afterPath="$PROJECT_DIR$/html/post_fail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/html/post_success.html" beforeDir="false" afterPath="$PROJECT_DIR$/html/post_success.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,6 +89,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="597" y="171" width="598" height="735" key="find.popup" timestamp="1609852926906">

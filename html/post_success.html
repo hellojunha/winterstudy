@@ -1,24 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Winter Study</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" />
-    <style>
-        body {
-            padding: 20px;
-        }
-
-        p {
-            font-family: sans-serif;
-        }
-    </style>
-</head>
-<body>
+{{ template "header.html" }}
 <p style="font-size: 48px">Code registered.</p>
 <p>Index for the code is {{ . }}. Remember for future use.</p>
 <p></p>
 <p></p>
 <a href="/">Back to home</a>
-</body>
-</html>
+{{ template "footer.html" }}

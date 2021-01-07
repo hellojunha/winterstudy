@@ -34,6 +34,10 @@ func getDatabase() *sql.DB {
 }
 
 func verifyCaptcha(response string) bool {
+	if len(response) == 0 {
+		return false
+	}
+
 	log.Println("response: " + response)
 	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", url.Values{"secret": {CAPTCHA_SECRET}, "response": {response}})
 	if err != nil {
@@ -128,6 +132,10 @@ func registerPost(captchaResp string, code string) int {
 		return -1
 	}
 
+	if len(code) == 0 {
+		return -1
+	}
+
 	db := getDatabase()
 	defer db.Close()
 
@@ -148,6 +156,10 @@ func registerPost(captchaResp string, code string) int {
 
 func registerComment(captchaResp string, postId int, text string) bool {
 	if !verifyCaptcha(captchaResp) {
+		return false
+	}
+
+	if len(text) == 0 {
 		return false
 	}
 

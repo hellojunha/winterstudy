@@ -10,8 +10,6 @@ import (
 	"strconv"
 )
 
-var wd string
-
 func init() {
 	f, err := os.OpenFile("/home/joona0825/winterstudy.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -21,9 +19,6 @@ func init() {
 	}
 
 	log.Println("instance is now running!")
-
-	_wd, _ := os.Getwd()
-	wd = _wd
 }
 
 func main() {
@@ -44,6 +39,14 @@ func die(w http.ResponseWriter) {
 	http.Error(w, "bad request", http.StatusBadRequest)
 }
 
+func templatePath(name string) string {
+	return "/home/joona0825/go/src/alfr.kr/winterstudy/html/" + name
+}
+
+func parseFile(name string) (*template.Template, error) {
+	return template.ParseFiles(templatePath(name), templatePath("header.html"), templatePath("footer.html"))
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, err := strconv.Atoi(vars["page"])
@@ -57,7 +60,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		list, pages = getPostList(0)
 	}
 
-	t, err := template.ParseFiles(wd + "/html/index.html")
+	t, err := parseFile("index.html")
 	if err == nil {
 		data := struct {
 			Posts []Post
@@ -76,7 +79,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func _registerCodeForm(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles(wd + "/html/post.html")
+	t, err := parseFile("post.html")
 	if err == nil {
 		data := struct {
 			CaptchaKey string
@@ -95,12 +98,12 @@ func _registerCodeForm(w http.ResponseWriter, r *http.Request) {
 func _registerCode(w http.ResponseWriter, r *http.Request) {
 	result := registerPost(r.PostFormValue("captcha"), r.PostFormValue("code"))
 	if result == -1 {
-		t, _ := template.ParseFiles(wd + "/html/post_fail.html")
+		t, _ := parseFile("post_fail.html")
 		t.Execute(w, r.PostFormValue("code"))
 		return
 	}
 
-	t, _ := template.ParseFiles(wd + "/html/post_success.html")
+	t, _ := parseFile("post_success.html")
 	t.Execute(w, result)
 }
 
@@ -110,7 +113,7 @@ func _getCode(w http.ResponseWriter, r *http.Request) {
 
 	if err == nil {
 		post := getPost(id)
-		t, err := template.ParseFiles(wd + "/html/code.html")
+		t, err := parseFile("code.html")
 		if err == nil {
 			data := struct {
 				Post Post
