@@ -31,7 +31,7 @@ func main() {
 	r.HandleFunc("/code/{id:[0-9]+}", _getCode).Methods(http.MethodGet)
 	r.HandleFunc("/comment", _registerComment).Methods(http.MethodPost)
 	r.HandleFunc("/category", _listCategory).Methods(http.MethodGet) // Listing All Categories
-	r.HandleFunc("/category/{cat:[a-zA-Z0-9_]+", _getCategoryCode).Methods(http.MethodGet) // Get Categories' Code
+	r.HandleFunc("/category/{cat:[a-zA-Z0-9_]+}", _getCategoryCode).Methods(http.MethodGet) // Get Categories' Code
 	err := http.ListenAndServe(":9927", r)
 	if err != nil {
 		log.Fatal(err.Error())
