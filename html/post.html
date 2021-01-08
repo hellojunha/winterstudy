@@ -1,73 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Winter Study</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/default.min.css" />
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" />
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
-    <style>
-        body {
-            padding: 20px;
-        }
+{{ template "header.html" }}
+<script>
+    var onloadCallback = function() {
+        grecaptcha.render("captcha_area", {
+            "sitekey" : "{{ .CaptchaKey }}",
+            "callback" : function(response) {
+                document.getElementById("captcha_response").value = response
+                document.getElementById("code_form").submit();
+            }
+        });
+    };
+</script>
 
-        p {
-            font-family: sans-serif;
-        }
 
-        .hljs-ln-numbers {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+<form id="code_form" action="/post/register" method="post">
+    <!-- Dropdown to select Category-->
+    <select name="category">
+        <option value="LinkedList">LinkedList</option>
+        <option value="boj3986">boj3986</option>
+        <option value="boj10845">boj10845</option>
+        <option value="Fibonacci_Time_Complexity">Fibonacci_Time_Complexity</option>
+    </select>
+    <input type="hidden" name="captcha" id="captcha_response">
+    <textarea name="code" class="post" id="input"></textarea>
+    <p>Preview</p>
+    <pre><code id="output"></code></pre>
+    <div id="captcha_area"></div>
+</form>
 
-            text-align: center;
-            color: #ccc;
-            border-right: 1px solid #ccc;
-            vertical-align: top;
-            padding-right: 10px !important;
-        }
+<script>
+    var input = document.getElementById("input");
+    var output = document.getElementById("output");
 
-        .hljs-ln-code {
-            padding-left: 10px !important;
-        }
-        .hljs {
-            white-space: pre;
-            overflow-x: auto;
-        }
+    input.addEventListener("input", function (e) {
+        output.innerHTML = escapeHtml(input.value);
+        highlight();
+    }, false);
 
-        .post {
-            margin-bottom: 40px;
-            border-bottom: 1px solid #ccc;
-        }
+    function highlight() {
+        hljs.highlightBlock(output);
+    }
 
-        .comment {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #ccc;
-        }
-    </style>
-    <script>
-        hljs.initHighlightingOnLoad();
-        hljs.initLineNumbersOnLoad();
-    </script>
-</head>
-<body>
-    <pre><code>{{ .Code }}</code></pre>
-
-    <div style="height: 40px"></div>
-
-    {{ range $i, $e := .Comments }}
-        <div class="comment">
-            <p>#{{ $i }}</p>
-            <p>{{ $e.Text }}</p>
-        </div>
-    {{ else }}
-        <p>No comment registered yet</p>
-    {{ end }}
-</body>
-</html>
+    // code from https://stackoverflow.com/a/6234804/1930006
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+{{ template "footer.html" }}

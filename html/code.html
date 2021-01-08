@@ -1,0 +1,33 @@
+{{ template "header.html" }}
+<script>
+    var onloadCallback = function() {
+        grecaptcha.render("captcha_area", {
+            "sitekey" : "{{ .CaptchaKey }}",
+            "callback" : function(response) {
+                document.getElementById("captcha_response").value = response
+                document.getElementById("comment_form").submit();
+            }
+        });
+    };
+</script>
+
+<p><a href="javascript:history.back()">&lt;&lt;Back</a></p>
+<p></p>
+<pre><code>{{ .Post.Code }}</code></pre>
+<div style="height: 40px"></div>
+{{ range $i, $e := .Post.Comments }}
+    <div id="comment">
+        <p>#{{ $i }}</p>
+        <p>{{ $e.Text }}</p>
+    </div>
+{{ else }}
+    <p>No comment registered yet</p>
+{{ end }}
+
+<form id="comment_form" action="/comment" method="post">
+    <input type="hidden" name="captcha" id="captcha_response">
+    <input type="hidden" name="post_id" value="{{ .Post.Id }}">
+    <textarea name="comment" id="input"></textarea>
+    <div id="captcha_area"></div>
+</form>
+{{ template "footer.html" }}

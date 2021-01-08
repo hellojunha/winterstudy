@@ -10,8 +10,6 @@ import (
 	"strconv"
 )
 
-var wd string
-
 
 func init() {
 	f, err := os.OpenFile("/home/joona0825/winterstudy.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -22,16 +20,14 @@ func init() {
 	}
 
 	log.Println("instance is now running!")
-
-	_wd, _ := os.Getwd()
-	wd = _wd
 }
 
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", home)
 	r.HandleFunc("/{page:[0-9]+}", home)
-	r.HandleFunc("/code", _registerCode).Methods(http.MethodPost)
+	r.HandleFunc("/post", _registerCodeForm).Methods(http.MethodGet)
+	r.HandleFunc("/post/register", _registerCode).Methods(http.MethodPost)
 	r.HandleFunc("/code/{id:[0-9]+}", _getCode).Methods(http.MethodGet)
 	r.HandleFunc("/comment", _registerComment).Methods(http.MethodPost)
 	r.HandleFunc("/category", _listCategory).Methods(http.MethodGet) // Listing All Categories
@@ -46,23 +42,52 @@ func die(w http.ResponseWriter) {
 	http.Error(w, "bad request", http.StatusBadRequest)
 }
 
+func templatePath(name string) string {
+	return "/home/joona0825/go/src/alfr.kr/winterstudy/html/" + name
+}
+
+func parseFile(name string) (*template.Template, error) {
+	return template.ParseFiles(templatePath(name), templatePath("header.html"), templatePath("footer.html"))
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, err := strconv.Atoi(vars["page"])
 
 	var list []Post
+	var pages int
+
 	if err == nil {
-		list = getPostList(page)
+		list, pages = getPostList(page)
 	} else {
-		list = getPostList(0)
+		list, pages = getPostList(0)
 	}
 
-	t, err := template.ParseFiles(wd + "/html/index.html")
+	t, err := parseFile("index.html")
 	if err == nil {
 		data := struct {
 			Posts []Post
+			Pages []int
 		} {
 			Posts: list,
+			Pages: make([]int, pages),
+		}
+		err := t.Execute(w, data)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	} else {
+		log.Println(err.Error())
+	}
+}
+
+func _registerCodeForm(w http.ResponseWriter, r *http.Request) {
+	t, err := parseFile("post.html")
+	if err == nil {
+		data := struct {
+			CaptchaKey string
+		} {
+			CaptchaKey: CAPTCHA_KEY,
 		}
 		err := t.Execute(w, data)
 		if err != nil {
@@ -74,7 +99,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func _registerCode(w http.ResponseWriter, r *http.Request) {
-	registerPost(r.PostFormValue("captcha"), r.PostFormValue("code"), r.PostFormValue("category"))
+	result := registerPost(r.PostFormValue("captcha"), r.PostFormValue("code"), r.PostFormValue("category"))
+	if result == -1 {
+		t, _ := parseFile("post_fail.html")
+		t.Execute(w, r.PostFormValue("code"))
+		return
+	}
+
+	t, _ := parseFile("post_success.html")
+	t.Execute(w, result)
 }
 
 func _getCode(w http.ResponseWriter, r *http.Request) {
@@ -83,9 +116,16 @@ func _getCode(w http.ResponseWriter, r *http.Request) {
 
 	if err == nil {
 		post := getPost(id)
-		t, err := template.ParseFiles(wd + "/html/post.html")
+		t, err := parseFile("code.html")
 		if err == nil {
-			err := t.Execute(w, post)
+			data := struct {
+				Post Post
+				CaptchaKey string
+			} {
+				Post: *post,
+				CaptchaKey: CAPTCHA_KEY,
+			}
+			err := t.Execute(w, data)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -101,8 +141,14 @@ func _getCode(w http.ResponseWriter, r *http.Request) {
 
 func _registerComment(w http.ResponseWriter, r *http.Request) {
 	postId, err := strconv.Atoi(r.PostFormValue("post_id"))
+	comment := r.PostFormValue("comment")
 	if err == nil {
-		registerComment(r.PostFormValue("captcha"), postId, r.PostFormValue("text"))
+		result := registerComment(r.PostFormValue("captcha"), postId, comment)
+		if result {
+			http.Redirect(w, r, "https://study.alfr.kr/code/" + r.PostFormValue("post_id"), http.StatusSeeOther)
+		} else {
+			fmt.Fprintf(w, "Failed to register comment.\nThis was your comment:\n\n%s", comment)
+		}
 	} else {
 		die(w)
 	}

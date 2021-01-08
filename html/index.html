@@ -1,65 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Winter Study</title>
-	<meta charset="utf-8" />
-	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/default.min.css" />
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" />
-	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
-	<style>
-		body {
-			padding: 20px;
-		}
+{{ template "header.html" }}
 
-		p {
-			font-family: sans-serif;
-		}
-
-		.hljs-ln-numbers {
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-
-			text-align: center;
-			color: #ccc;
-			border-right: 1px solid #ccc;
-			vertical-align: top;
-			padding-right: 10px !important;
-		}
-
-		.hljs-ln-code {
-			padding-left: 10px !important;
-		}
-		.hljs {
-			white-space: pre;
-			overflow-x: auto;
-		}
-
-		.post {
-			margin-bottom: 40px;
-			border-bottom: 1px solid #ccc;
-		}
-	</style>
-	<script>
-		hljs.initHighlightingOnLoad();
-		hljs.initLineNumbersOnLoad();
-	</script>
-</head>
-<body>
-    <a href="/category">Category</a>
-
-	{{ range .Posts }}
-		<div class="post">
-			<pre><code>{{ .Code }}</code></pre>
-			<p>
-				{{ len .Comments }} comments for this code<br>
-				<a href="/code/{{ .Id }}">View or register comment</a>
-			</p>
-		</div>
-	{{ end }}
-</body>
-</html>
+<p style="font-size: 35px; text-align: left"><a href="/category">Category List</a></p>
+<p style="font-size: 24px; text-align: right"><a href="/post">SUBMIT YOUR CODE HERE</a></p>
+<div style="height: 20px"></div>
+{{ range .Posts }}
+	<div id="post">
+		<p>#{{ .Id }}</p>
+		<pre><code>{{ .Code }}</code></pre>
+		<p>
+			{{ len .Comments }} comments for this code<br>
+			<a href="/code/{{ .Id }}">View or register comment</a>
+		</p>
+	</div>
+{{ end }}
+<p style="text-align: center">
+{{ range $i, $e := .Pages }}
+	&nbsp;<a href="/{{ $i }}">{{ $i }}</a>&nbsp;
+{{ end }}
+</p>
+{{ template "footer.html" }}
