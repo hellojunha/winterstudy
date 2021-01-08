@@ -20,7 +20,15 @@ type Post struct {
 	Id int
 	Dt time.Time
 	Code string
+	Category []Category // Add relationship in DB
 	Comments []Comment
+}
+
+// Add same field in DB, related to Post
+// Add ["LinkedList", 1], ["boj3986", 1], ["boj10845", 1], ["Fibonacci_Time_Complexity", 1] to DB field before publish service
+type Category struct {
+	Category string // Unique
+	Week int
 }
 
 func getDatabase() *sql.DB {
@@ -57,6 +65,67 @@ func getPostList(page int) []Post {
 	posts := make([]Post, 0)
 
 	rows, err := db.Query("select id from study_post order by id desc limit ?, 10", page * 10)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var id int
+			err := rows.Scan(&id)
+			if err == nil {
+				post := getPost(id)
+				if post != nil {
+					posts = append(posts, *post)
+				} else {
+					log.Printf("post %d returned nil", id)
+				}
+			} else {
+				log.Println(err.Error())
+			}
+		}
+	} else {
+		log.Println(err.Error())
+	}
+
+	log.Printf("returning %d posts", len(posts))
+
+	return posts
+}
+
+// get Category List (string type slice) from DB 
+func _getCategoryList() []Category {
+	db := getDatabase()
+	defer db.Close()
+
+	cats := make([]Category, 0)
+
+	rows, err := db.Query("select category from study_category") // Check this Query
+
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			err := rows.Scan(&category)
+			if err == nil {
+				cats = append(cats, &category) 
+			} else {
+				log.Println(err.Error())
+			}
+		}
+	} else {
+		log.Println(err.Error())
+	}
+
+	// log.Printf("getting categories")
+
+	return cats
+}
+
+// similar as func getPostList() but Query is little different, and not paging  
+func getPostListFromCategory(string cat) [] {
+	db := getDatabase()
+	defer db.Close()
+
+	posts := make([]Post, 0)
+
+	rows, err := db.Query("select id from study_post order by id desc where category = ?", cat) 
 	if err == nil {
 		defer rows.Close()
 		for rows.Next() {

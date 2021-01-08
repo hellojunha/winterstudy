@@ -59,15 +59,14 @@
 <body>
     <pre><code>{{ .Code }}</code></pre>
 
-    <div style="height: 40px"></div>
-
-    {{ range $i, $e := .Comments }}
-        <div class="comment">
-            <p>#{{ $i }}</p>
-            <p>{{ $e.Text }}</p>
-        </div>
-    {{ else }}
-        <p>No comment registered yet</p>
-    {{ end }}
+    {{ range .Posts }}
+		<div class="post">
+			<pre><code>{{ .Code }}</code></pre>
+			<p>
+				{{ len .Comments }} comments for this code<br>
+				<a href="/code/{{ .Id }}">View or register comment</a>
+			</p>
+		</div>
+	{{ end }}
 </body>
 </html>
