@@ -20,14 +20,13 @@ type Post struct {
 	Id int
 	Dt time.Time
 	Code string
-	Category []Category // Add relationship in DB
+	Category Category
 	Comments []Comment
 }
 
-// Add same field in DB, related to Post
-// Add ["LinkedList", 1], ["boj3986", 1], ["boj10845", 1], ["Fibonacci_Time_Complexity", 1] to DB field before publish service
 type Category struct {
-	Category string // Unique
+	id int
+	Category string
 	Week int
 }
 
@@ -102,21 +101,21 @@ func getPostList(page int) ([]Post, int) {
 	return posts, pages
 }
 
-// get Category List (string type slice) from DB 
 func _getCategoryList() []Category {
 	db := getDatabase()
 	defer db.Close()
 
 	cats := make([]Category, 0)
 
-	rows, err := db.Query("select category from study_category") // Check this Query
+	rows, err := db.Query("select * from study_category")
 
 	if err == nil {
 		defer rows.Close()
 		for rows.Next() {
-			err := rows.Scan(&category)
+			var category Category
+			err := rows.Scan(&category.id, &category.Category, &category.Week)
 			if err == nil {
-				cats = append(cats, &category) 
+				cats = append(cats, category) 
 			} else {
 				log.Println(err.Error())
 			}
@@ -130,14 +129,12 @@ func _getCategoryList() []Category {
 	return cats
 }
 
-// similar as func getPostList() but Query is little different, and not paging  
-func getPostListFromCategory(string cat) [] {
+func getPostListFromCategory(cat string) []Post {
 	db := getDatabase()
 	defer db.Close()
 
 	posts := make([]Post, 0)
-
-	rows, err := db.Query("select id from study_post order by id desc where category = ?", cat) 
+	rows, err := db.Query("select id from study_post where category = ? order by id desc", cat) 
 	if err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -196,7 +193,7 @@ func getPost(id int) *Post {
 	return &post
 }
 
-func registerPost(captchaResp string, code string) int {
+func registerPost(captchaResp string, code string, category string) int {
 	if !verifyCaptcha(captchaResp) {
 		return -1
 	}
@@ -208,7 +205,7 @@ func registerPost(captchaResp string, code string) int {
 	db := getDatabase()
 	defer db.Close()
 
-	_, err := db.Exec("insert into study_post (code) values (?)", code)
+	_, err := db.Exec("insert into study_post (code, category) values (?, ?)", code, category)
 	if err != nil {
 		log.Println(err.Error())
 		return -1

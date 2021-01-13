@@ -10,20 +10,17 @@
 	<style>
 		body {
 			padding: 20px;
+			font-size: 20pt;
 		}
 
 		p {
 			font-family: sans-serif;
 		}
-		.post {
-			margin-bottom: 40px;
-			border-bottom: 1px solid #ccc;
-		}
 	</style>
 </head>
 <body>
-	{{ range .category }}
-		<a href="/category/{{.}}">{{.}}</a>
+	{{ range .Categories }}
+	<a href="/category/{{ .Category }}"> {{ .Category }}</a></br>
 	{{ end }}
 </body>
 </html>

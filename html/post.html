@@ -13,12 +13,10 @@
 
 
 <form id="code_form" action="/post/register" method="post">
-    <!-- Dropdown to select Category-->
     <select name="category">
-        <option value="LinkedList">LinkedList</option>
-        <option value="boj3986">boj3986</option>
-        <option value="boj10845">boj10845</option>
-        <option value="Fibonacci_Time_Complexity">Fibonacci_Time_Complexity</option>
+        {{ range .Categories }}
+        <option value="{{ .Category }}">{{ .Category }}</option>
+        {{ end}}
     </select>
     <input type="hidden" name="captcha" id="captcha_response">
     <textarea name="code" class="post" id="input"></textarea>
