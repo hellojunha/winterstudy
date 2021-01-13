@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Winter Study</title>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/default.min.css" />
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css" />
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+	<style>
+		body {
+			padding: 20px;
+			font-size: 20pt;
+		}
+
+		p {
+			font-family: sans-serif;
+		}
+	</style>
+</head>
+<body>
+	{{ range .Categories }}
+	<a href="/category/{{ .Category }}"> {{ .Category }}</a></br>
+	{{ end }}
+</body>
+</html>

@@ -20,7 +20,14 @@ type Post struct {
 	Id int
 	Dt time.Time
 	Code string
+	Category Category
 	Comments []Comment
+}
+
+type Category struct {
+	id int
+	Category string
+	Week int
 }
 
 func getDatabase() *sql.DB {
@@ -94,6 +101,65 @@ func getPostList(page int) ([]Post, int) {
 	return posts, pages
 }
 
+func _getCategoryList() []Category {
+	db := getDatabase()
+	defer db.Close()
+
+	cats := make([]Category, 0)
+
+	rows, err := db.Query("select * from study_category")
+
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var category Category
+			err := rows.Scan(&category.id, &category.Category, &category.Week)
+			if err == nil {
+				cats = append(cats, category) 
+			} else {
+				log.Println(err.Error())
+			}
+		}
+	} else {
+		log.Println(err.Error())
+	}
+
+	// log.Printf("getting categories")
+
+	return cats
+}
+
+func getPostListFromCategory(cat string) []Post {
+	db := getDatabase()
+	defer db.Close()
+
+	posts := make([]Post, 0)
+	rows, err := db.Query("select id from study_post where category = ? order by id desc", cat) 
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var id int
+			err := rows.Scan(&id)
+			if err == nil {
+				post := getPost(id)
+				if post != nil {
+					posts = append(posts, *post)
+				} else {
+					log.Printf("post %d returned nil", id)
+				}
+			} else {
+				log.Println(err.Error())
+			}
+		}
+	} else {
+		log.Println(err.Error())
+	}
+
+	log.Printf("returning %d posts", len(posts))
+
+	return posts
+}
+
 func getPost(id int) *Post {
 	db := getDatabase()
 	defer db.Close()
@@ -127,7 +193,7 @@ func getPost(id int) *Post {
 	return &post
 }
 
-func registerPost(captchaResp string, code string) int {
+func registerPost(captchaResp string, code string, category string) int {
 	if !verifyCaptcha(captchaResp) {
 		return -1
 	}
@@ -139,7 +205,7 @@ func registerPost(captchaResp string, code string) int {
 	db := getDatabase()
 	defer db.Close()
 
-	_, err := db.Exec("insert into study_post (code) values (?)", code)
+	_, err := db.Exec("insert into study_post (code, category) values (?, ?)", code, category)
 	if err != nil {
 		log.Println(err.Error())
 		return -1

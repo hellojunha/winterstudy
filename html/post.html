@@ -11,7 +11,13 @@
     };
 </script>
 
+
 <form id="code_form" action="/post/register" method="post">
+    <select name="category">
+        {{ range .Categories }}
+        <option value="{{ .Category }}">{{ .Category }}</option>
+        {{ end}}
+    </select>
     <input type="hidden" name="captcha" id="captcha_response">
     <textarea name="code" class="post" id="input"></textarea>
     <p>Preview</p>

@@ -1,0 +1,16 @@
+{{ template "header.html" }}
+
+<div style="height: 20px"></div>
+{{ range .Posts }}
+	<div id="post">
+		<p>#{{ .Id }}</p>
+		<pre><code>{{ .Code }}</code></pre>
+		<p>
+			{{ len .Comments }} comments for this code<br>
+			<a href="/code/{{ .Id }}">View or register comment</a>
+		</p>
+	</div>
+{{ end }}
+<p style="text-align: center">
+</p>
+{{ template "footer.html" }}

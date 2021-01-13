@@ -29,6 +29,8 @@ func main() {
 	r.HandleFunc("/post/register", _registerCode).Methods(http.MethodPost)
 	r.HandleFunc("/code/{id:[0-9]+}", _getCode).Methods(http.MethodGet)
 	r.HandleFunc("/comment", _registerComment).Methods(http.MethodPost)
+	r.HandleFunc("/category", _listCategory).Methods(http.MethodGet)
+	r.HandleFunc("/category/{cat:[a-zA-Z0-9_]+}", _getCategoryCode).Methods(http.MethodGet)
 	err := http.ListenAndServe(":9927", r)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -80,11 +82,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func _registerCodeForm(w http.ResponseWriter, r *http.Request) {
 	t, err := parseFile("post.html")
+	categories := _getCategoryList()
+
 	if err == nil {
 		data := struct {
-			CaptchaKey string
+		 	CaptchaKey string
+			Categories []Category
 		} {
-			CaptchaKey: CAPTCHA_KEY,
+		 	CaptchaKey: CAPTCHA_KEY,
+			Categories: categories,
 		}
 		err := t.Execute(w, data)
 		if err != nil {
@@ -96,7 +102,7 @@ func _registerCodeForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func _registerCode(w http.ResponseWriter, r *http.Request) {
-	result := registerPost(r.PostFormValue("captcha"), r.PostFormValue("code"))
+	result := registerPost(r.PostFormValue("captcha"), r.PostFormValue("code"), r.PostFormValue("category"))
 	if result == -1 {
 		t, _ := parseFile("post_fail.html")
 		t.Execute(w, r.PostFormValue("code"))
@@ -150,4 +156,46 @@ func _registerComment(w http.ResponseWriter, r *http.Request) {
 		die(w)
 	}
 
+}
+
+func _listCategory(w http.ResponseWriter, r *http.Request) {
+	categories := _getCategoryList()
+	t, err := parseFile("categoryList.html")
+
+	if err == nil {
+		data := struct {
+			Categories []Category
+		} {
+			Categories: categories,
+		}
+		err := t.Execute(w, data) 
+		if err != nil {
+			log.Println(err.Error())
+		}
+	} else {
+		log.Println(err.Error())
+	}
+
+}
+
+func _getCategoryCode(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	cat := vars["cat"]
+
+	list := getPostListFromCategory(cat)
+
+	t, err := parseFile("category.html")
+	if err == nil {
+		data := struct {
+			Posts []Post
+		} {
+			Posts: list,
+		}
+		err := t.Execute(w, data)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	} else {
+		log.Println(err.Error())
+	}
 }
